@@ -52,7 +52,7 @@ typedef struct {
 
 //Tap dance keys
 enum {
-    TD_JP_CAPS,  //Tap caps for JP/ENG, hold for layer 1
+    TD_JP_CAPS,  //Tap caps for JP/ENG, hold for ctrl
     TD_SFT_CAPS, //Double tap shift for caps lock
 };
 
@@ -63,6 +63,9 @@ td_state_t cur_dance(qk_tap_dance_state_t *state);
 void jp_finished(qk_tap_dance_state_t *state, void *user_data);
 void jp_reset(qk_tap_dance_state_t *state, void *user_data);
 
+#define _QWERTY 0
+#define _FUNCTION 1
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 //      ESC      F1       F2       F3       F4       F5        F6       F7       F8       F9       F10      F11      F12      Prt           Rotary(Mute)
@@ -72,7 +75,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //      Sh_L              Z        X        C        V         B        N        M        ,        .        ?                 Sh_R     Up       End
 //      Ct_L     Win_L    Alt_L                                SPACE                               Alt_R    FN       Ct_R     Left     Down     Right
 
-    [0] = LAYOUT(
+    [_QWERTY] = LAYOUT(
         KC_ESC,         KC_F1,   KC_F2,   KC_F3,   KC_F4,   KC_F5,    KC_F6,   KC_F7,   KC_F8,   KC_F9,   KC_F10,  KC_F11,  KC_F12,  C_A_D,            KC_MUTE,
         KC_GRV,         KC_1,    KC_2,    KC_3,    KC_4,    KC_5,     KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_MINS, KC_EQL,  KC_BSPC,          KC_HOME,
         KC_TAB,         KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,     KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS,          DSK_L,
@@ -81,7 +84,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_LCTL,        KC_LGUI, KC_LALT,                             KC_SPC,                             KC_DEL, MO(1),   SCRNSHT, KC_LEFT, KC_DOWN, KC_RGHT
     ),
 
-    [1] = LAYOUT(
+    [_FUNCTION] = LAYOUT(
         _______, _______, _______, _______, _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______,         _______,
       LED_TILDE, LED_1,  LED_2,   LED_3,   LED_4,    LED_5,   LED_6,   LED_7,   LED_8,   LED_9,   LED_0,   LED_MINS, LED_EQL,  KC_INS,         _______,
         _______, RGB_SAI, RGB_VAI, RGB_HUI, RGB_TOG,  _______, _______, _______, _______, _______, _______, _______, _______, RESET,           KC_BRIU,
@@ -366,20 +369,21 @@ td_state_t cur_dance(qk_tap_dance_state_t *state) {
 }
 
 // Initialize tap structure associated with example tap dance key
-static td_tap_t ql_tap_state = {
+static td_tap_t jp_tap_state = {
     .is_press_action = true,
     .state = TD_NONE
 };
 
 // Functions that control what our tap dance key does
-void ql_finished(qk_tap_dance_state_t *state, void *user_data) {
-    ql_tap_state.state = cur_dance(state);
-    switch (ql_tap_state.state) {
+void jp_finished(qk_tap_dance_state_t *state, void *user_data) {
+    jp_tap_state.state = cur_dance(state);
+    switch (jp_tap_state.state) {
         case TD_SINGLE_TAP:
             tap_code16(LALT(KC_GRV));
             break;
         case TD_SINGLE_HOLD:
-            layer_on(1);
+            //layer_on(1);
+            register_mods(MOD_BIT(KC_LCTL));
             break;
         // case TD_DOUBLE_TAP:
         //     // Check to see if the layer is already set
@@ -396,16 +400,25 @@ void ql_finished(qk_tap_dance_state_t *state, void *user_data) {
     }
 }
 
-void ql_reset(qk_tap_dance_state_t *state, void *user_data) {
+void jp_reset(qk_tap_dance_state_t *state, void *user_data) {
     // If the key was held down and now is released then switch off the layer
-    if (ql_tap_state.state == TD_SINGLE_HOLD) {
-        layer_off(1);
+    // if (jp_tap_state.state == TD_SINGLE_HOLD) {
+        // layer_off(1);
+    // }
+    // jp_tap_state.state = TD_NONE;
+    switch (jp_tap_state.state) {
+        case TD_SINGLE_TAP:
+            break;
+        case TD_SINGLE_HOLD:
+            unregister_mods(MOD_BIT(KC_LCTL)); // For a layer-tap key, use `layer_off(_MY_LAYER)` here
+            break;
+        default:
+            break;
     }
-    ql_tap_state.state = TD_NONE;
 }
 
 // Associate our tap dance key with its functionality
 qk_tap_dance_action_t tap_dance_actions[] = {
-    [TD_JP_CAPS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, ql_finished, ql_reset),
+    [TD_JP_CAPS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, jp_finished, jp_reset),
     [TD_SFT_CAPS] = ACTION_TAP_DANCE_DOUBLE(KC_LSFT, KC_CAPS),
 };
