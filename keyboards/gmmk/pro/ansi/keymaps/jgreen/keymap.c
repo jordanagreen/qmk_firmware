@@ -33,7 +33,7 @@ enum my_keycodes {
   SCRNSHT,
   C_A_D,
   DSK_L,
-  DSK_R
+  DSK_R,
 };
 
 //Tap Dance 
@@ -65,7 +65,8 @@ void jp_finished(qk_tap_dance_state_t *state, void *user_data);
 void jp_reset(qk_tap_dance_state_t *state, void *user_data);
 
 #define _QWERTY 0
-#define _FUNCTION 1
+#define _NAVIGATE 1
+#define _ADJUST 2
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -82,10 +83,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_TAB,         KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,     KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_LBRC, KC_RBRC, KC_BSLS,          DSK_L,
         TD(TD_JP_CAPS), KC_A,    KC_S,    KC_D,    KC_F,    KC_G,     KC_H,    KC_J,    KC_K,    KC_L,    KC_SCLN, KC_QUOT,          KC_ENT,           DSK_R,
         KC_LSFT,        KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,     KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH,         TD(TD_SFT_CAPS), KC_UP,   KC_END,
-        KC_LCTL,        KC_LGUI, KC_LALT,                             KC_SPC,                             KC_DEL, MO(1),   SCRNSHT, KC_LEFT, KC_DOWN, KC_RGHT
+        KC_LCTL,        KC_LGUI, KC_LALT,                             KC_SPC,                             KC_DEL, MO(_ADJUST),   SCRNSHT, KC_LEFT, KC_DOWN, KC_RGHT
     ),
 
-    [_FUNCTION] = LAYOUT(
+    [_NAVIGATE] = LAYOUT(
+        _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,         _______,
+        _______, _______, _______, _______, _______, _______, _______,   _______,   _______,   _______,   _______,   _______, _______,  _______,  _______,
+        _______, _______, _______, _______, _______, _______, _______, C(KC_LEFT), C(KC_RIGHT), KC_HOME, KC_END, _______, _______, _______,           _______,
+        _______, _______, _______, _______, _______, _______,  KC_LEFT, KC_DOWN, KC_UP, KC_RIGHT, _______, _______,         _______,          _______,
+        _______, _______, _______, _______, _______,  _______, KC_PGUP, KC_PGDN, _______, _______, _______,         _______, _______, _______,
+        _______, _______, _______,                             _______,                            _______, _______, _______, _______, _______, _______
+    ),
+
+    [_ADJUST] = LAYOUT(
         _______, _______, _______, _______, _______,  _______, _______, _______, _______, _______, _______, _______, _______, _______,         _______,
       LED_TILDE, LED_1,  LED_2,   LED_3,   LED_4,    LED_5,   LED_6,   LED_7,   LED_8,   LED_9,   LED_0,   LED_MINS, LED_EQL,  KC_INS,         _______,
         _______, RGB_SAI, RGB_VAI, RGB_HUI, RGB_TOG,  _______, _______, _______, _______, _______, _______, _______, _______, RESET,           KC_BRIU,
@@ -140,7 +150,8 @@ static void set_rgb_scroll_leds_on(void);
 static void set_rgb_caps_leds_off(void);
 static void set_rgb_scroll_leds_off(void);
 static void set_rgb_mods_on(void);
-static void set_rgb_function_layer_on(void);
+static void set_rgb_adjust_layer_on(void);
+static void set_rgb_navigate_layer_on(void);
 
 // Called on powerup and is the last _init that is run.
 void keyboard_post_init_user(void) {
@@ -284,8 +295,11 @@ void rgb_matrix_indicators_user(void) {
     }
 
     switch (get_highest_layer(layer_state)) {
-        case _FUNCTION:
-            set_rgb_function_layer_on();
+        case _NAVIGATE:
+            set_rgb_navigate_layer_on();
+            break;
+        case _ADJUST:
+            set_rgb_adjust_layer_on();
             break;
         default: // for any other layers, or the default layer
             break;
@@ -367,7 +381,7 @@ static void set_rgb_mods_on() {
         rgb_matrix_set_color(69, 0, 255, 255); //F13
 }
 
-static void set_rgb_function_layer_on() {
+static void set_rgb_adjust_layer_on() {
     rgb_matrix_set_color(93, 255, 0, 0);   //Backslash (reset)
     rgb_matrix_set_color(8, 0, 255, 0);   //Q (saturation)
     rgb_matrix_set_color(14, 255, 255, 255);   //W (brightness up)
@@ -377,6 +391,19 @@ static void set_rgb_function_layer_on() {
     rgb_matrix_set_color(15, 255, 255, 255);   //S (brightness down)
     rgb_matrix_set_color(21, 255, 0, 255); //D (mode)
     rgb_matrix_set_color(26, 255, 255, 0); //F (speed)
+}
+
+static void set_rgb_navigate_layer_on() {
+    rgb_matrix_set_color(37, 0, 0, 255); //H
+    rgb_matrix_set_color(42, 0, 0, 255); //J
+    rgb_matrix_set_color(47, 0, 0, 255); //K
+    rgb_matrix_set_color(53, 0, 0, 255); //L
+    rgb_matrix_set_color(41, 255, 0, 0); //U
+    rgb_matrix_set_color(46, 255, 0, 0); //I
+    rgb_matrix_set_color(52, 0, 255, 0); //O
+    rgb_matrix_set_color(58, 0, 255, 0); //P
+    rgb_matrix_set_color(38, 255, 0, 0); //N
+    rgb_matrix_set_color(43, 255, 0, 0); //M
 }
 
 
@@ -405,8 +432,8 @@ void jp_finished(qk_tap_dance_state_t *state, void *user_data) {
             tap_code16(LALT(KC_GRV));
             break;
         case TD_SINGLE_HOLD:
-            //layer_on(1);
-            register_mods(MOD_BIT(KC_LCTL));
+            layer_on(_NAVIGATE);
+            // register_mods(MOD_BIT(KC_LCTL));
             break;
         // case TD_DOUBLE_TAP:
         //     // Check to see if the layer is already set
@@ -425,19 +452,19 @@ void jp_finished(qk_tap_dance_state_t *state, void *user_data) {
 
 void jp_reset(qk_tap_dance_state_t *state, void *user_data) {
     // If the key was held down and now is released then switch off the layer
-    // if (jp_tap_state.state == TD_SINGLE_HOLD) {
-        // layer_off(1);
-    // }
-    // jp_tap_state.state = TD_NONE;
-    switch (jp_tap_state.state) {
-        case TD_SINGLE_TAP:
-            break;
-        case TD_SINGLE_HOLD:
-            unregister_mods(MOD_BIT(KC_LCTL)); // For a layer-tap key, use `layer_off(_MY_LAYER)` here
-            break;
-        default:
-            break;
+    if (jp_tap_state.state == TD_SINGLE_HOLD) {
+        layer_off(_NAVIGATE);
     }
+    // jp_tap_state.state = TD_NONE;
+    // switch (jp_tap_state.state) {
+    //     case TD_SINGLE_TAP:
+    //         break;
+    //     case TD_SINGLE_HOLD:
+    //         unregister_mods(MOD_BIT(KC_LCTL)); // For a layer-tap key, use `layer_off(_MY_LAYER)` here
+    //         break;
+    //     default:
+    //         break;
+    // }
 }
 
 // Associate our tap dance key with its functionality
