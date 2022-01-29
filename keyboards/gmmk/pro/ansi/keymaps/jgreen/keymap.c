@@ -391,6 +391,10 @@ static void set_rgb_adjust_layer_on() {
     rgb_matrix_set_color(15, 255, 255, 255);   //S (brightness down)
     rgb_matrix_set_color(21, 255, 0, 255); //D (mode)
     rgb_matrix_set_color(26, 255, 255, 0); //F (speed)
+    rgb_matrix_set_color(94, 255, 255, 255); //Up
+    rgb_matrix_set_color(97, 255, 255, 255); //Down
+    rgb_matrix_set_color(95, 255, 255, 255); //Left
+    rgb_matrix_set_color(79, 255, 255, 255); //Right
 }
 
 static void set_rgb_navigate_layer_on() {
