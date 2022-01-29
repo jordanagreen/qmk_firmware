@@ -33,8 +33,7 @@ enum my_keycodes {
   SCRNSHT,
   C_A_D,
   DSK_L,
-  DSK_R,
-  JP_LANG
+  DSK_R
 };
 
 //Tap Dance 
@@ -249,12 +248,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         return false;
     case DSK_L:
         if (record->event.pressed) {
-            tap_code16(LCTL(LGUI(KC_PGUP)));
+            tap_code16(LCTL(LGUI(KC_LEFT)));
         }
         return false;
     case DSK_R:
         if (record->event.pressed) {
-            tap_code16(LCTL(LGUI(KC_PGDN)));
+            tap_code16(LCTL(LGUI(KC_RIGHT)));
         }
         return false;
   }   
